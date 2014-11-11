@@ -7,13 +7,10 @@ package pakkuman;
  * @matricule 000362341
  *
  */
-import java.util.LinkedList;
 import java.util.List;
 
-public class Pakkuman {
-	
-	private List< Monster > _monsters = new LinkedList< Monster >();
-	private List< Bonbon > _bonbons = new LinkedList< Bonbon >();
+public class Pakkuman extends Element {
+
 	
 	/**
 	 * Main du projet
@@ -26,40 +23,22 @@ public class Pakkuman {
 			FileLoader fileloader = new FileLoader();
 			if ( fileloader.loadFromFile( args[0] ) ) {
 				
-				Pakkuman pakkuman = new Pakkuman( fileloader.getMonsters(), fileloader.getBonbons());
-				pakkuman.getInitSituation();
+				Labyrinthe labyrinthe = fileloader.getLabyrinthe();
+				Pakkuman pakkuman = fileloader.getPakkuman();
+				List< Monster > monsters = fileloader.getMonsters();
+				List< Bonbon > bonbons = fileloader.getBonbons();
 				
-			}
-			else {
-				System.out.println(":::ERROR::: Format du fichier non respecté.");
+				System.out.println("Le labyrinthe a un dimension " + labyrinthe.getSize().x + " fois " + labyrinthe.getSize().y );
+				System.out.println("Il contient " + monsters.size() + " monstres et " + bonbons.size() + " bonbons.");
+				
+				Game game = new Game( labyrinthe, pakkuman, monsters, bonbons );
+				game.createFileSituation( "init.txt" );
+				
 			}
 		}
 		
 		else {
-			System.out.println(":::ERROR::: Argument manquant.");
+			System.out.println("ERROR: Argument manquant.");
 		}
 	}
-	
-	
-	
-	/**
-	 * 
-	 * @param monsters
-	 * @param bonbons
-	 */
-	public Pakkuman(List<Monster> monsters, List<Bonbon> bonbons) {
-		_monsters = monsters;
-		_bonbons = bonbons;
-	}
-	
-	
-	
-	/**
-	 * 
-	 */
-	private void getInitSituation() {
-		System.out.println(":::ERROR::: getInitSituation");
-	}
-	
-	
 }
