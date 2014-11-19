@@ -9,23 +9,28 @@ import java.util.List;
 
 public class FileLoader {
 	
-	private Pakkuman _pakkuman = new Pakkuman();
-	private List< Monster > _monsters = new LinkedList< Monster >();
-	private List< Bonbon > _bonbons= new LinkedList< Bonbon >();
+	private Element _pakkuman = new Element();
+	private List< Element > _monsters = new LinkedList< Element >();
+	private List< Element > _bonbons= new LinkedList< Element >();
 	private Labyrinthe _labyrinthe = new Labyrinthe(0,0);
 	
-	
-	
-	public Pakkuman getPakkuman() {
-		return _pakkuman;
-	}
 	
 	
 	/**
 	 * 
 	 * @return
 	 */
-	public List< Monster > getMonsters() {
+	public Element getPakkuman() {
+		return _pakkuman;
+	}
+	
+	
+	
+	/**
+	 * Retourne le nombre de monstres trouvé en chargant le fichier.
+	 * @return Un entier du nombre de monstres.
+	 */
+	public List< Element > getMonsters() {
 		return _monsters;
 	}
 	
@@ -35,11 +40,16 @@ public class FileLoader {
 	 * 
 	 * @return
 	 */
-	public List< Bonbon > getBonbons() {
+	public List< Element > getBonbons() {
 		return _bonbons;
 	}
 	
 	
+	
+	/**
+	 * 
+	 * @return
+	 */
 	public Labyrinthe getLabyrinthe() {
 		return _labyrinthe;
 	}
@@ -123,13 +133,10 @@ public class FileLoader {
 					// Ligne: "Emplacements:"
 					else if( parts[0].contains("Emplacements:") ) {
 						line = br.readLine();
-						parts = line.split(" ");
 						pakkumanCoords = searchCoords( line );
 						line = br.readLine();
-						parts = line.split(" ");
 						monstersCoords = searchCoords( line );
 						line = br.readLine();
-						parts = line.split(" ");
 						bonbonsCoords = searchCoords( line );
 					}
 				}
@@ -138,29 +145,15 @@ public class FileLoader {
 			
 			_pakkuman.setPosition( pakkumanCoords.get(0) );
 			for ( int i = 0; i < nbOfMonsters; ++i ) {
-				Monster newMonster = new Monster();
+				Element newMonster = new Element();
 				newMonster.setPosition( monstersCoords.get(i) );
 				_monsters.add( newMonster);
 			}
 			for ( int i = 0; i < nbOfBonbons; ++i ) {
-				Bonbon newBonbon = new Bonbon();
+				Element newBonbon = new Element();
 				newBonbon.setPosition( bonbonsCoords.get(i) );
 				_bonbons.add( newBonbon );
 			}
-			
-			System.out.println("INFO: labyrinthe loaded with size (" + _labyrinthe.getSize().x + "," + _labyrinthe.getSize().y +")" );
-			System.out.println( _labyrinthe );
-			System.out.println("INFO: pakkuman loaded at (" + _pakkuman.getPosition().x + "," + _pakkuman.getPosition().y + ")." );
-			System.out.print("INFO: " + _monsters.size() + " monsters loaded at ");
-			for( int i = 0; i < _monsters.size(); ++i ) {
-				System.out.print( "(" + _monsters.get(i).getPosition().x + "," + _monsters.get(i).getPosition().y + ")" );
-			}
-			System.out.println(".");
-			System.out.print("INFO: " + _bonbons.size() + " bonbons loaded at ");
-			for( int i = 0; i < _bonbons.size(); ++i ) {
-				System.out.print( "(" + _bonbons.get(i).getPosition().x + "," + _bonbons.get(i).getPosition().y + ")" );
-			}
-			System.out.println(".");
 			
 			return true;
 		}		
@@ -190,10 +183,12 @@ public class FileLoader {
 	 */
 	private static List< Vector2<Integer> > searchCoords( String string ) {
 		List<  Vector2<Integer> > list = new LinkedList<  Vector2<Integer> >();
-		String coords = keepOnlyNumber ( string );
-		for( int i = 0; i < coords.length(); ++i ) {
-			int x = (int) coords.charAt( i );
-			int y = (int) coords.charAt( ++i );
+		
+		String[] parts = string.split(" ");
+		for( int i = 1; i < parts.length; ++i ) {
+			String[] parts2 = parts[i].split(",");
+			int x =  Integer.parseInt( parts2[0].replace("(", "") );
+			int y =  Integer.parseInt( parts2[1].replace(")", "") );
 			list.add( new Vector2<Integer>(x,y) );
 		}
 		return list;

@@ -48,16 +48,47 @@ public class Labyrinthe {
 		_matrice[x][y] = wall;
 	}
 	
+	public boolean get( int x, int y ) {
+		return _matrice[x][y];
+	}
+	
 	
 	public String toString() {
 		String string = new String();
 		for ( int y = 0 ; y < _matrice.length; ++y ) {
 			for ( int x = 0 ; x < _matrice.length; ++x ) {
 				if( _matrice[x][y] ) {
-					string += " ";
+					if( y%2 == 0 ) {
+						if( x%2 != 0 ) {
+							string += "   ";
+						}
+						else {
+							string += " ";
+						}
+					}
+					else {
+						if ( x%2 == 0 ) {
+							string += " ";
+						}
+						else {
+							string += "   ";
+						}
+					}
+					
 				}
 				else {
-					string += "+";
+					if( y%2 == 0 ) {
+						if ( x%2 == 0 ) {
+							string += "+";
+						}
+						else {
+							string += "---";
+						}
+					}
+					else {
+						string += "|";
+					}
+					
 				}
 			}
 			string += "\n";
