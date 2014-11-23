@@ -65,11 +65,11 @@ public class Pakkuman {
 				// On va chercher le chemin le plus court.
 				Path path = new Path(labyrinthe, pakkuman, monsters, candys);
 				
-				List<Point> pathCoords = path.search();
+				List<Point> pathCoords = path.getPath();
 				
 				
-				System.out.println( "Trouvé un plus court chemin de longueur " + path.size() + "." );
-				System.out.println( "M. Pakkuman a pris " + path.candys() + " Bonbons!" );
+				System.out.println( "Trouvé un plus court chemin de longueur " + path.getSize() + "." );
+				System.out.println( "M. Pakkuman a pris " + path.getNumberCandyUsed() + " Bonbons!" );
 				System.out.print( "Déplacements de M. Pakkuman:" );
 				for ( Iterator<Point> iter = pathCoords.iterator(); iter.hasNext();  ) {
 					Point point = iter.next();

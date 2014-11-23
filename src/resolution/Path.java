@@ -24,7 +24,20 @@ public class Path {
 	int           _candysOnPath = 0;
 	
 	
+	
+	public Path() {
+		
+	}
+	
+	
+	
 	public Path( Labyrinthe labyrinthe, Element pakkuman, List<Element> monsters, List<Element> candys ) {
+		set( labyrinthe, pakkuman, monsters, candys );
+	}
+	
+	
+	
+	public void set( Labyrinthe labyrinthe, Element pakkuman, List<Element> monsters, List<Element> candys ) {
 		_labyrinthe = labyrinthe;
 		_pakkuman = pakkuman;
 		_monsters = monsters;
@@ -33,19 +46,19 @@ public class Path {
 	
 	
 	
-	public int size() {
+	public int getSize() {
 		return _path.size();
 	}
 	
 	
 	
-	public int candys() {
+	public int getNumberCandyUsed() {
 		return _candysOnPath;
 	}
 	
 	
 	
-	public List<Point> search() {
+	public List<Point> getPath() {
 		
 		List<Point> list_start = new LinkedList<Point>();
 		list_start.add( _pakkuman.getPosition() );
@@ -81,6 +94,7 @@ public class Path {
 		
 		_path = betterPath( list_top, list_right, list_down, list_left, _labyrinthe );
 		_path.remove( _path.size()-1 );
+		
 		return _path;
 	}
 	
@@ -92,9 +106,32 @@ public class Path {
 		Point right = new Point( position.x+1, position.y   );
 		Point down  = new Point( position.x  , position.y-1 );
 		Point left  = new Point( position.x-1, position.y   );
-		return null;
 		
+		System.out.println( list );
+		
+		if ( list.get( list.size()-1 ) != up ) {
+			list.add( up );
+			recursiveSearch( list, candys );
+			list.remove( list.size()-1 );
+		}
+		if ( list.get( list.size()-1 ) != right ) {
+			list.add( right );
+			recursiveSearch( list, candys );
+			list.remove( list.size()-1 );
+		}
+		if ( list.get( list.size()-1 ) != down ) {
+			list.add( down );
+			recursiveSearch( list, candys );
+			list.remove( list.size()-1 );
+		}
+		if ( list.get( list.size()-1 ) != left ) {
+			list.add( left );
+			recursiveSearch( list, candys );
+			list.remove( list.size()-1 );
+		}
 		// TODO: Suite..
+		
+		return null;
 	}
 
 
