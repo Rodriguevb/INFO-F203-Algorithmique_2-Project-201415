@@ -7,10 +7,11 @@ package pakkuman;
  * @matricule 000362341
  *
  */
+import java.awt.Point;
 
 public class Element {
 	
-	private Vector2<Integer> _position = new Vector2<Integer> (0,0);
+	private Point _position = new Point(0,0);
 	
 	
 	
@@ -18,7 +19,7 @@ public class Element {
 	 * 
 	 * @return
 	 */
-	public Vector2<Integer> getPosition() {
+	public Point getPosition() {
 		return _position;
 	}
 	
@@ -28,7 +29,7 @@ public class Element {
 	 * 
 	 * @param position
 	 */
-	public void setPosition( Vector2<Integer> position ) {
+	public void setPosition( Point position ) {
 		_position = position;
 	}
 }
