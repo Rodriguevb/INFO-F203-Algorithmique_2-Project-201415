@@ -10,105 +10,41 @@ package pakkuman;
 
 public class Case {
 	
-	public boolean    top       = false,
-	                  right     = false,
-	                  down      = false,
-	                  left      = false;
-	private State state = State.Free;
+	private boolean _up    = false,
+	                _right = false,
+	                _down  = false,
+	                _left  = false;
+	private State _state = State.Free;
+
 	
-	
-	
-	/**
-	 * Constructeur.
-	 */
-	Case() {
+	public boolean getUp() {
+		return _up;
 	}
-	
-	
-	
-	/**
-	 * Constructeur.
-	 * @param top Possibilité d'aller au dessus.
-	 * @param right Possiblité d'aller à droite.
-	 * @param down Possibilité d'aller en bas.
-	 * @param left Possibilité d'aller à gauche.
-	 */
-	Case( boolean top, boolean right, boolean down, boolean left ) {
-		this.top   = top;
-		this.right = right;
-		this.down  = down;
-		this.left  = left;
+	public boolean getRight() {
+		return _right;
 	}
-	
-	
-	
-	public boolean topOpen() {
-		return false;
+	public boolean getDown() {
+		return _down;
 	}
-	
-	
-	
-	/**
-	 * Indique si il y a la possiblité d'aller dans la direction demandée.
-	 * @param direction La direction demandée.
-	 * @return Si il est possible d'aller dans la direction.
-	 */
-	public boolean get( Direction direction ) {
-		if ( direction == Direction.Top ) {
-			return top;
-		}
-		else if ( direction == Direction.Right ) {
-			return right;
-		}
-		else if ( direction == Direction.Down ) {
-			return down;
-		}
-		else {
-			return left;
-		}
+	public boolean getLeft() {
+		return _left;
 	}
-	
-	
-	
-	/**
-	 * Modifie l'état de la case.
-	 * @param state Le nouvel état de la case.
-	 */
+	public void setUp( boolean up ) {
+		_up = up;
+	}
+	public void setRight( boolean right ) {
+		_right = right;
+	}
+	public void setDown( boolean down ) {
+		_down = down;
+	}
+	public void setLeft( boolean left ) {
+		_left = left;
+	}
 	public void setState( State state ) {
-		this.state = state;
+		_state = state;
 	}
-	
-	
-	
-	/**
-	 * Renvoie l'état de la case.
-	 * @return L'état de la case.
-	 */
 	public State getState() {
-		return state;
-	}
-	
-	
-	
-	/**
-	 * Une énumération représentant une direction.
-	 */
-	public enum Direction {
-		Top,
-		Right,
-		Down,
-		Left
-	}
-	
-	
-	
-	/**
-	 * Une énumération représentant l'état d'une case.
-	 */
-	public enum State {
-		Free,
-		Candy,
-		Monster,
-		End
+		return _state;
 	}
 }

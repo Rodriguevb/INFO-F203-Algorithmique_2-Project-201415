@@ -8,255 +8,197 @@ package pakkuman;
  *
  */
 import java.awt.Point;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-
-import pakkuman.Case.Direction;
 
 public class Path {
 	
 	
-	Labyrinthe    _labyrinthe   = null;
-	Element       _pakkuman     = null;
-	List<Element> _monsters     = null;
-	List<Element> _candys       = null;
-	List<Point>   _path         = null;
-	int           _candysOnPath = 0;
+	private   Pakkuman    pakkuman = null;
+	protected int         candysUsed = -1;
 	
+	public Path( Pakkuman pakkuman ) {
+		this.pakkuman  = pakkuman;
+	}
 	
-	
-	public Path() {
-		
+	/**
+	 * Change en string.
+	 */
+	public String toString() {
+		String string = new String();
+		for ( Iterator<Point> iter = pakkuman.path.iterator(); iter.hasNext();  ) {
+			Point point = iter.next();
+			string += " (" + point.x + "," + point.y + ")";
+		}
+		return string;
 	}
 	
 	
-	
-	public Path( Labyrinthe labyrinthe, Element pakkuman, List<Element> monsters, List<Element> candys ) {
-		set( labyrinthe, pakkuman, monsters, candys );
+	/**
+	 * Renvoie le nombre de bonbon utilisé pour aller jusqu'à la sortie.
+	 * @return Le nombre de bonbon utilisé.
+	 */
+	public int howManyCandysUsed() {
+		return candysUsed;
 	}
 	
 	
-	
-	public void set( Labyrinthe labyrinthe, Element pakkuman, List<Element> monsters, List<Element> candys ) {
-		_labyrinthe = labyrinthe;
-		_pakkuman = pakkuman;
-		_monsters = monsters;
-		_candys = candys;
+	public void search() {
+		
+		pakkuman.path = new LinkedList<Point>();
+		int candys = howManyCandyNeeded( pakkuman.tree_exit, pakkuman.tree_root );
+		
+		
+		if ( candys > 0 ) { // Si on a au moins besoin de 1 bonbon.
+			// Le nombre de bonbon qu'on a besoin == le nombre de demi-tour autorisé.
+			List<Point> path = new LinkedList<Point>();
+			path.add( pakkuman.tree_root.getNode().getPoint() );
+			recursiveMakePath( pakkuman, path, pakkuman.tree_root, candys, 0 );
+		}
+		else { // Si on a pas besoin de bonbon.
+			// TODO: Prendre la path qui va de la fin au début.
+		}
 	}
 	
 	
-	
-	public int getSize() {
-		return _path.size();
-	}
-	
-	
-	
-	public int getNumberCandyUsed() {
-		return _candysOnPath;
-	}
-	
-	
-	
-	public List<Point> getPath() {
+	/**
+	 * Compte combien de bonbon on a besoin pour arriver de la racine jusqu'à coord_end
+	 * @param coord_end L'arrivée.
+	 * @param racine La racine.
+	 * @return Le nombre de bonbon qu'on a besoin.
+	 */
+	private static int howManyCandyNeeded( Tree end, Tree racine ) {
 		
-		List<Point> list_start = new LinkedList<Point>();
-		list_start.add( _pakkuman.getPosition() );
+		Tree actual = end.getParent();
+		int candys = 0;
 		
-		
-		Point start = _pakkuman.getPosition();
-		Point up    = new Point( _pakkuman.getPosition().x  , _pakkuman.getPosition().y+1 );
-		Point right = new Point( _pakkuman.getPosition().x+1, _pakkuman.getPosition().y   );
-		Point down  = new Point( _pakkuman.getPosition().x  , _pakkuman.getPosition().y-1 );
-		Point left  = new Point( _pakkuman.getPosition().x-1, _pakkuman.getPosition().y   );
-		
-		List<Point> list_top   = new LinkedList<Point>( list_start );
-		List<Point> list_right = new LinkedList<Point>( list_start );
-		List<Point> list_down  = new LinkedList<Point>( list_start );
-		List<Point> list_left  = new LinkedList<Point>( list_start );
-		
-		if ( _labyrinthe.get( start ).top ) {
-			list_top.add( up );
-			list_top = recursiveSearch( list_top, 0 );
-		}
-		if ( _labyrinthe.get( start ).right ) {
-			list_right.add( right );
-			list_right = recursiveSearch( list_right, 0 );
-		}
-		if ( _labyrinthe.get( start ).down ) {
-			list_down.add( down );
-			list_down = recursiveSearch( list_down, 0 );
-		}
-		if ( _labyrinthe.get( start ).left ) {
-			list_left.add( left );
-			list_left = recursiveSearch( list_left, 0 );
-		}
-		
-		_path = betterPath( list_top, list_right, list_down, list_left, _labyrinthe );
-		_path.remove( _path.size()-1 );
-		
-		return _path;
-	}
-	
-	
-	
-	private List<Point> recursiveSearch( List<Point> list, int candys) {
-		Point position = list.get( list.size() - 1 );
-		Point up    = new Point( position.x  , position.y+1 );
-		Point right = new Point( position.x+1, position.y   );
-		Point down  = new Point( position.x  , position.y-1 );
-		Point left  = new Point( position.x-1, position.y   );
-		
-		System.out.println( list );
-		
-		if ( list.get( list.size()-1 ) != up ) {
-			list.add( up );
-			recursiveSearch( list, candys );
-			list.remove( list.size()-1 );
-		}
-		if ( list.get( list.size()-1 ) != right ) {
-			list.add( right );
-			recursiveSearch( list, candys );
-			list.remove( list.size()-1 );
-		}
-		if ( list.get( list.size()-1 ) != down ) {
-			list.add( down );
-			recursiveSearch( list, candys );
-			list.remove( list.size()-1 );
-		}
-		if ( list.get( list.size()-1 ) != left ) {
-			list.add( left );
-			recursiveSearch( list, candys );
-			list.remove( list.size()-1 );
-		}
-		// TODO: Suite..
-		
-		return null;
-	}
-
-
-
-	private List<Point> testPath( Labyrinthe labyrinthe, Point position, Direction direction, int candy, List<Point> list ) {
-		
-		if ( labyrinthe.get( position ).get( direction ) ) {
-			
-			Point newPosition = new Point( position );
-			if( direction == Direction.Top ) {
-				newPosition.y += 1;
+		do {
+			if ( actual.getNode().isCandy() ) {
+				candys -= 1;
 			}
-			else if( direction == Direction.Right ) {
-				newPosition.x += 1;
-			}
-			else if( direction == Direction.Down ) {
-				newPosition.y -= 1;
-			}
-			else {
-				newPosition.x -= 1;
+			else if ( actual.getNode().isMonster() ) {
+				candys += 1;
 			}
 			
-			if ( newPosition.x == -1 || newPosition.x == labyrinthe.getSize().width || newPosition.y == -1 || newPosition.y == labyrinthe.getSize().height ) {
-				list.add( newPosition );
-			}
-			else {
-				list.add( newPosition );
-				
-				List<Point> listTop   = new LinkedList<Point>();
-				List<Point> listRight = new LinkedList<Point>();
-				List<Point> listDown  = new LinkedList<Point>();
-				List<Point> listLeft  = new LinkedList<Point>();
-						
-				if( ! isBack( direction, Direction.Top ) ) {
-					listTop = testPath( labyrinthe, newPosition, Direction.Top, candy, new LinkedList<Point>( list ) );
+			actual = actual.getParent();
+		} while ( actual != racine );
+		
+		return candys;
+	}
+	
+	
+	private static boolean recursiveMakePath( Pakkuman pakkuman, List<Point> path, Tree tree, int returnPossible, int candys ) {
+		
+		if ( isPossibleToFoundABetterSolution(pakkuman, path) ) {
+			
+			boolean left_exist  = false;
+			boolean right_exist = false;
+			
+			// On teste le chemin à gauche.
+			if ( tree.getLeft() != null ) {
+				left_exist = true;
+				if ( testPath( pakkuman, path, tree.getLeft(), returnPossible, candys ) ) {
+					return true;
 				}
-				
-				if ( ! isEnd( listTop, labyrinthe ) ) {
-					if ( ! isBack( direction, Direction.Right ) ) {
-						listRight = testPath( labyrinthe, newPosition, Direction.Right, candy, new LinkedList<Point>( list ) );
-					}
-					
-					if ( ! isEnd( listRight, labyrinthe ) ) {
-						if ( ! isBack( direction, Direction.Down ) ) {
-							listDown = testPath( labyrinthe, newPosition, Direction.Down, candy, new LinkedList<Point>( list ) );
-						}
-						
-						if ( ! isEnd( listDown, labyrinthe ) ) {
-							if ( ! isBack( direction, Direction.Left ) ) {
-								listLeft = testPath( labyrinthe, newPosition, Direction.Left, candy, new LinkedList<Point>( list ) );
-							}
-						}
-					}
+			}
+			
+			// On teste le chemin à droite.
+			if ( tree.getRight() != null ) {
+				right_exist = true;
+				if ( testPath( pakkuman, path, tree.getRight(), returnPossible, candys ) ) {
+					return true;
 				}
-				
-				list = betterPath( listTop, listRight, listDown, listLeft, labyrinthe );
+			}
+			
+			// On teste le chemin en faisant un demi tour.
+			if ( returnPossible > 0 & !left_exist && !right_exist && tree.getParent() != null ) {
+				recursiveRecoverPath( pakkuman, path, tree, returnPossible, candys );
 			}
 		}
-		return list;
+		return false;
+	}
+
+	
+
+	private static boolean recursiveRecoverPath( Pakkuman pakkuman, List<Point> path, Tree child, int returnPossible, int candys  ) {
+		
+		Tree parent = child.getParent();
+		Node node = parent.getNode();
+		
+		path.add( node.getPoint() );
+		returnPossible -= 1;
+		
+		if ( isPossibleToFoundABetterSolution(pakkuman, path) ) {
+			
+			// Va faire l'autre fils
+			if ( parent.getLeft() != null && parent.getLeft() != child ) {
+				testPath( pakkuman, path, parent.getLeft(), returnPossible, candys  );
+			}
+			else if ( parent.getRight() != null && parent.getRight() != child ) {
+				testPath( pakkuman, path, parent.getRight(), returnPossible, candys  );
+			}
+			
+			// Remonte l'arbre
+			if ( parent.getParent() != null ) {
+				recursiveRecoverPath( pakkuman, path, parent, returnPossible, candys );
+			}
+		}
+		
+		path.remove( path.size() - 1 );
+		returnPossible += 1;
+		
+		return false;
 	}
 	
+
+
+	/**
+	 * Permet de tester une case précise.
+	 * @param solution Le parcours optimal.
+	 * @param path Le parcours actuel.
+	 * @param tree Le tree à essayer.
+	 * @return Si un nouveau parcours optimal a été trouvé.
+	 */
+	private static boolean testPath( Pakkuman pakkuman, List<Point> path, Tree tree, int returnPossible, int candys ) {
+		
+		Node node = tree.getNode();
+		path.add( tree.getNode().getPoint() );
+		
+		if ( node.isCandy() ) {
+			candys += 1;
+			recursiveMakePath( pakkuman, path, tree, returnPossible, candys );
+			candys -= 1;
+		}
+		else if ( node.isMonster() ) {
+			if ( candys > 0 ) {
+				candys -= 1;
+				recursiveMakePath( pakkuman, path, tree, returnPossible, candys );
+				candys += 1;
+			}
+			
+		}
+		else if ( tree.getNode().isEnd() ) {
+			pakkuman.path = new LinkedList<Point>( path );
+			return true;
+		}
+		else{
+			recursiveMakePath( pakkuman, path, tree, returnPossible, candys );
+		}
+		
+		path.remove( path.size() - 1 );
+		return false;
+	}
 	
 	
 	/**
-	 * Vérifie si M. Pakkuman ne fait pas demi-tour.
-	 * @param old_dir Ancienne direction.
-	 * @param new_dir Nouvelle direction.
-	 * @return Si il fait demi-tour.
+	 * Renvoie si c'est encore possible de trouver une meilleure solution ou non.
+	 * @param solution Le parcours optimal actuel.
+	 * @param path Le parcours actuel.
+	 * @return Si la longueur du chemin est plus petite que la solution déjà trouvée ou qu'aucune solution n'a encore été trouvée.
 	 */
-	private static boolean isBack( Direction old_dir, Direction new_dir ) {
-		return ( ( old_dir == Direction.Top ) && ( new_dir == Direction.Down ) ) ||
-		       ( ( old_dir == Direction.Down ) && ( new_dir == Direction.Top ) ) ||
-		       ( ( old_dir == Direction.Left ) && ( new_dir == Direction.Right ) ) ||
-		       ( ( old_dir == Direction.Right ) && ( new_dir == Direction.Left ) );
-	}
-	
-	
-	
-	/**
-	 * Parmis les 4 chemins, renvoie en priorité celui qui est fini et le plus court sinon le plus court.
-	 * @param list1 Première liste de chemin.
-	 * @param list2 Deuxième liste de chemin.
-	 * @param list3 Troisième liste de chemin.
-	 * @param list4 Quatrième liste de chemin.
-	 * @return Le chemin fini et plus court ou le chemin le plus court.
-	 */
-	private static List<Point> betterPath( List<Point> list1, List<Point> list2, List<Point> list3, List<Point> list4, Labyrinthe labyrinthe ) {
-		List<Point> best;
-		best = betterPath( list1, list2, labyrinthe );
-		best = betterPath( best, list3, labyrinthe );
-		best = betterPath( best, list4, labyrinthe );
-		return best;
-	}
-	
-	
-	
-	/**
-	 * Parmis les 2 chemins, renvoie en priorité celui qui est fini et le plus court sinon le plus court.
-	 * @param list1 Première liste de chemin.
-	 * @param list2 Deuxième liste de chemin.
-	 * @param labyrinthe 
-	 * @return Le chemin fini et plus court ou le chemin le plus court.
-	 */
-	private static List<Point> betterPath( List<Point> list1, List<Point> list2, Labyrinthe labyrinthe ) {
-		
-		List<Point> best = list1;
-		
-		// Si le chemin est vide.
-		if ( best.isEmpty() || isEnd ( list2, labyrinthe ) ) {
-			best = list2;
-		}
-		
-		return best;
-	}
-	
-	
-	
-	private static boolean isEnd( List<Point> list, Labyrinthe labyrinthe ) {
-		if ( ! list.isEmpty() ) {
-			Point point = list.get( list.size()-1 );
-			return ( point.x == -1 || point.x == labyrinthe.getSize().width || point.y == -1 || point.y == labyrinthe.getSize().height );
-		}
-		else {
-			return false;
-		}
+	private static boolean isPossibleToFoundABetterSolution( Pakkuman pakkuman, List<Point> path ) {
+		return pakkuman.path.size() == 0 || pakkuman.path.size() > path.size();
 	}
 }
 

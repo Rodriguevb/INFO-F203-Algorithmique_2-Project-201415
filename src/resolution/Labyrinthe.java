@@ -9,9 +9,6 @@ package pakkuman;
  */
 import java.awt.Dimension;
 import java.awt.Point;
-import java.util.List;
-
-import pakkuman.Case.Direction;
 
 public class Labyrinthe {
 	
@@ -139,12 +136,12 @@ public class Labyrinthe {
 		int height = (max_y*4) + 2;
 		int position = ( height )*( x*2 + 1 ) + ( 2 + (y*4) );
 		
-		string = string.substring(0,position-1-height) + ( _case.get(Direction.Left)? "   " : "---") + string.substring(position+2-height);
+		string = string.substring(0,position-1-height) + ( _case.getLeft() ? "   " : "---") + string.substring(position+2-height);
 		string = string.substring(0,position-1) + "   " + string.substring(position+2);
-		string = string.substring(0,position-1+height) + ( _case.get(Direction.Right)? "   " : "---") + string.substring(position+2+height);
+		string = string.substring(0,position-1+height) + ( _case.getRight() ? "   " : "---") + string.substring(position+2+height);
 		
-		string = string.substring(0,position-2) + ( _case.get(Direction.Down)? " " : "|") + string.substring(position-1);
-		string = string.substring(0,position+2) + ( _case.get(Direction.Top)? " " : "|") + string.substring(position+3);
+		string = string.substring(0,position-2) + ( _case.getDown() ? " " : "|") + string.substring(position-1);
+		string = string.substring(0,position+2) + ( _case.getUp() ? " " : "|") + string.substring(position+3);
 		
 		return string;
 	}
@@ -153,5 +150,12 @@ public class Labyrinthe {
 	
 	public static String replaceCharAt( String string, int position, char character ) {
 		return string.substring(0,position) + character + string.substring(position+1);
+	}
+
+
+
+	public boolean contains( Point point ) {
+		return 0 <= point.x && point.x < getSize().width &&
+		       0 <= point.y && point.y < getSize().height;
 	}
 }

@@ -12,16 +12,16 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
 public class FileLoader {
 	
-	private Element         _pakkuman   = new Element();
-	private List< Element > _monsters   = new LinkedList< Element >();
-	private List< Element > _bonbons    = new LinkedList< Element >();
-	private Labyrinthe      _labyrinthe = new Labyrinthe(0,0);
+	private Point         _start      = new Point();
+	private Point         _end        = null;
+	private List< Point > _monsters   = new LinkedList< Point >();
+	private List< Point > _bonbons    = new LinkedList< Point >();
+	private Labyrinthe    _labyrinthe = new Labyrinthe(0,0);
 	
 	
 	
@@ -29,8 +29,18 @@ public class FileLoader {
 	 * 
 	 * @return
 	 */
-	public Element getPakkuman() {
-		return _pakkuman;
+	public Point getStart() {
+		return _start;
+	}
+	
+	
+
+	/**
+	 * 
+	 * @return
+	 */
+	public Point getEnd() {
+		return _end;
 	}
 	
 	
@@ -39,7 +49,7 @@ public class FileLoader {
 	 * Retourne le nombre de monstres trouvé en chargant le fichier.
 	 * @return Un entier du nombre de monstres.
 	 */
-	public List< Element > getMonsters() {
+	public List< Point > getMonsters() {
 		return _monsters;
 	}
 	
@@ -49,7 +59,7 @@ public class FileLoader {
 	 * 
 	 * @return
 	 */
-	public List< Element > getBonbons() {
+	public List< Point > getBonbons() {
 		return _bonbons;
 	}
 	
@@ -71,9 +81,9 @@ public class FileLoader {
 	 */
 	public boolean loadFromFile( String file ) {
 		try{
-			InputStream ips = new FileInputStream( file ); 
-			InputStreamReader ipsr = new InputStreamReader(ips);
-			BufferedReader br = new BufferedReader(ipsr);
+			InputStream ips        = new FileInputStream  ( file ); 
+			InputStreamReader ipsr = new InputStreamReader( ips );
+			BufferedReader br      = new BufferedReader   ( ipsr );
 			
 			int nbOfMonsters = 0;
 			int nbOfBonbons = 0;
@@ -105,7 +115,7 @@ public class FileLoader {
 							matrice[x] = new boolean[_labyrinthe.getSize().height*4+1];
 						}
 						
-						// On remplit la matrice
+						// On remplit cette grande matrice
 						for( int x = 0; x < matrice.length; ++x ) {
 							line = br.readLine();
 							line = line.replace("-", "+");
@@ -116,18 +126,28 @@ public class FileLoader {
 							}
 						}
 				
-						// On copie le contenu de la matrice géante en "divisant" les abscisses par 3
+						// On copie le contenu de la matrice géante dans une plus petite en "divisant" les abscisses par 3
 						int x_real = 0;
 						int y_real = 0;
 						for( int x = 1; x < matrice.length-1; x+=2 ) {
 							for( int y = 2; y < matrice[0].length-2; y+=4 ) {
 								if ( matrice[x][y] ) {
 									Case newCase = new Case();
-									newCase.top   = matrice[x][y+2];
-									newCase.right = matrice[x+1][y];
-									newCase.down  = matrice[x][y-2];
-									newCase.left  = matrice[x-1][y];
+									newCase.setUp   ( matrice[x][y+2] );
+									newCase.setRight( matrice[x+1][y] );
+									newCase.setDown ( matrice[x][y-2] );
+									newCase.setLeft ( matrice[x-1][y] );
 									_labyrinthe.set( x_real, y_real, newCase);
+									
+									if ( _end == null ) {
+										if ( newCase.getUp()    && y_real == _labyrinthe.getSize().height-1 ||
+											 newCase.getRight() && x_real == _labyrinthe.getSize().width-1 ||
+											 newCase.getDown()  && y_real == 0 ||
+											 newCase.getLeft()  && x_real == 0 ) {
+											_end = new Point( x_real, y_real );
+										}
+									}
+									
 								}
 								y_real += 1;
 							}
@@ -159,15 +179,15 @@ public class FileLoader {
 			}
 			br.close();
 			
-			_pakkuman.setPosition( pakkumanCoords.get(0) );
+			_start = pakkumanCoords.get(0);
 			for ( int i = 0; i < nbOfMonsters; ++i ) {
-				Element newMonster = new Element();
-				newMonster.setPosition( monstersCoords.get(i) );
+				Point newMonster = new Point();
+				newMonster = monstersCoords.get(i);
 				_monsters.add( newMonster);
 			}
 			for ( int i = 0; i < nbOfBonbons; ++i ) {
-				Element newBonbon = new Element();
-				newBonbon.setPosition( candysCoords.get(i) );
+				Point newBonbon = new Point();
+				newBonbon = candysCoords.get(i);
 				_bonbons.add( newBonbon );
 			}
 			
@@ -178,22 +198,6 @@ public class FileLoader {
 			System.out.println( exception.toString() );
 			return false;
 		}
-	}
-	
-	
-	
-	private List<Point> adaptCoordsToLaby( List<Point> coords ) {
-		
-		List<Point> real_coords = new LinkedList<Point>();
-		
-		for( Iterator<Point> iter = coords.iterator(); iter.hasNext(); ) {
-			Point vector = iter.next();
-			int x = vector.x * 2 + 1;
-			int y = vector.y * 2 + 1;
-			real_coords.add( new Point( x, y ) );
-		}
-		
-		return real_coords;
 	}
 
 
