@@ -1,0 +1,12 @@
+\section{Étapes}
+
+Les étapes de l'algorithme sont simples :
+\begin{enumerate}
+	\item On récupère le fichier d'entrée contenant les détails du labyrinthe (voir énoncé).
+    \item On décrypte ce fichier en une matrice.
+    \item On forme un arbre binaire.
+    \item On élimine les voies sans issue.
+    \item On remonte l'arbre de la fin jusqu'au début en calculant le nombre de bonbons besoins.
+    \item Le nombre de bonbons devient alors le nombre de demi-tour permis.
+    \item On recherche le chemin le plus court mais le calcul devient moins long car les impasses sont retirés et les demis-tours sont limités.
+\end{enumerate}
