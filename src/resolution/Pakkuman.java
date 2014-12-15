@@ -65,10 +65,10 @@ public class Pakkuman {
 				path.search();
 				
 				System.out.println( "Trouvé un plus court chemin de longueur " + pakkuman.path.size() + "." );
-				System.out.println( "M. Pakkuman a pris " + path.howManyCandysUsed() + " Bonbons!" );
+				System.out.println( "M. Pakkuman a pris " + pakkuman.candys + " Bonbons!" );
 				System.out.print( "Déplacements de M. Pakkuman:" + path );
 				
-				pakkuman.createFileEndSituation( "coord_end.txt" );
+				pakkuman.createFileEndSituation( "end.txt", path );
 				
 			}
 		}
@@ -94,6 +94,9 @@ public class Pakkuman {
 	protected Tree        tree_root       = null; // Le Tree de départ.
 	protected Tree        tree_exit       = null; // Le Tree de sortie.
 	protected List<Point> path            = null; // Le meilleur chemin.
+	protected int         candys          = 0;
+	protected int         monsters        = 0;
+	protected boolean     found           = false;
 	
 	/**
 	 * 
@@ -108,10 +111,10 @@ public class Pakkuman {
 			
 			String string = new String();
 			
-			string = add( labyrinthe, string );
-			string = add( coord_start,   string, 'P' );
-			string = add( coords_monsters,   string, 'M' );
-			string = add( coords_candys,     string, 'o' );
+			string = add( labyrinthe     , string );
+			string = add( coord_start    , string, 'P' );
+			string = add( coords_monsters, string, 'M' );
+			string = add( coords_candys,   string, 'o' );
 			
 			
 			filewriter.write ( string );
@@ -126,7 +129,7 @@ public class Pakkuman {
 	
 	
 	
-	public boolean createFileEndSituation( String filename ) {
+	public boolean createFileEndSituation( String filename, Path path ) {
 		File file = new File ( filename );
 		try {
 			FileWriter filewriter = new FileWriter ( file );
@@ -134,15 +137,20 @@ public class Pakkuman {
 			
 			String string = new String();
 			
-			string = add( labyrinthe, string );
-			string = add( coord_start,   string, 'P' );
-			string = add( coords_monsters,   string, 'M' );
-			string = add( coords_candys,     string, 'o' );
+			string = add( labyrinthe,      string );
+			string = add( coord_start,     string, 'P' );
+			string = add( coords_monsters, string, 'M' );
+			string = add( coords_candys,   string, 'o' );
+			string = add( this.path,            string, '#' );
 			
-			for ( Iterator<Point> iter = path.iterator(); iter.hasNext();  ) {
-				Point point = iter.next();
-				string = add( point, string, '#' );
+			if ( found ) {
+				string += "\nTrouvé un plus court chemin de longueur " + this.path.size();
 			}
+			else {
+				string += "\nIl n'y a pas moyen de sortir.";
+			}
+			string += "\nM. Pakkuman a pris " + candys +" Bonbons!";
+			string += "\nDéplacements de M. Pakkuman:" + path;
 			
 			filewriter.write ( string );
 			filewriter.close();
@@ -175,8 +183,10 @@ public class Pakkuman {
 		
 		for( int i = 0; i < list.size(); ++i ) {
 			Point position_real = list.get( i );
-			int position_str = realPos(position_real.x, position_real.y, labyrinthe.getSize().height);
-			string = replaceCharAt(string, position_str, character);
+			int index = realPos(position_real.x, position_real.y, labyrinthe.getSize().height);
+			if ( string.charAt( index ) == ' ' ) {
+				string = replaceCharAt(string, index, character);
+			}
 		}
 		
 		return string;

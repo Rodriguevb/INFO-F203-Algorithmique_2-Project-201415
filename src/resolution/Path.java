@@ -16,7 +16,6 @@ public class Path {
 	
 	
 	private   Pakkuman    pakkuman = null;
-	protected int         candysUsed = -1;
 	
 	public Path( Pakkuman pakkuman ) {
 		this.pakkuman  = pakkuman;
@@ -34,16 +33,9 @@ public class Path {
 		return string;
 	}
 	
-	
 	/**
-	 * Renvoie le nombre de bonbon utilisé pour aller jusqu'à la sortie.
-	 * @return Le nombre de bonbon utilisé.
+	 * Recherche le plus court chemin.
 	 */
-	public int howManyCandysUsed() {
-		return candysUsed;
-	}
-	
-	
 	public void search() {
 		
 		pakkuman.path = new LinkedList<Point>();
@@ -54,11 +46,13 @@ public class Path {
 			// Le nombre de bonbon qu'on a besoin == le nombre de demi-tour autorisé.
 			List<Point> path = new LinkedList<Point>();
 			path.add( pakkuman.tree_root.getNode().getPoint() );
-			recursiveMakePath( pakkuman, path, pakkuman.tree_root, candys, 0 );
+			recursiveMakePath( pakkuman, path, pakkuman.tree_root, candys );
 		}
 		else { // Si on a pas besoin de bonbon.
 			// TODO: Prendre la path qui va de la fin au début.
 		}
+		
+		pakkuman.candys += pakkuman.monsters;
 	}
 	
 	
@@ -88,7 +82,7 @@ public class Path {
 	}
 	
 	
-	private static boolean recursiveMakePath( Pakkuman pakkuman, List<Point> path, Tree tree, int returnPossible, int candys ) {
+	private static boolean recursiveMakePath( Pakkuman pakkuman, List<Point> path, Tree tree, int returnPossible, int candys, int monsters ) {
 		
 		if ( isPossibleToFoundABetterSolution(pakkuman, path) ) {
 			
@@ -98,7 +92,7 @@ public class Path {
 			// On teste le chemin à gauche.
 			if ( tree.getLeft() != null ) {
 				left_exist = true;
-				if ( testPath( pakkuman, path, tree.getLeft(), returnPossible, candys ) ) {
+				if ( testPath( pakkuman, path, tree.getLeft(), returnPossible ) ) {
 					return true;
 				}
 			}
@@ -106,14 +100,14 @@ public class Path {
 			// On teste le chemin à droite.
 			if ( tree.getRight() != null ) {
 				right_exist = true;
-				if ( testPath( pakkuman, path, tree.getRight(), returnPossible, candys ) ) {
+				if ( testPath( pakkuman, path, tree.getRight(), returnPossible ) ) {
 					return true;
 				}
 			}
 			
 			// On teste le chemin en faisant un demi tour.
 			if ( returnPossible > 0 & !left_exist && !right_exist && tree.getParent() != null ) {
-				recursiveRecoverPath( pakkuman, path, tree, returnPossible, candys );
+				recursiveRecoverPath( pakkuman, path, tree, returnPossible );
 			}
 		}
 		return false;
@@ -121,7 +115,7 @@ public class Path {
 
 	
 
-	private static boolean recursiveRecoverPath( Pakkuman pakkuman, List<Point> path, Tree child, int returnPossible, int candys  ) {
+	private static boolean recursiveRecoverPath( Pakkuman pakkuman, List<Point> path, Tree child, int returnPossible, int candys, int monsters ) {
 		
 		Tree parent = child.getParent();
 		Node node = parent.getNode();
@@ -133,15 +127,15 @@ public class Path {
 			
 			// Va faire l'autre fils
 			if ( parent.getLeft() != null && parent.getLeft() != child ) {
-				testPath( pakkuman, path, parent.getLeft(), returnPossible, candys  );
+				testPath( pakkuman, path, parent.getLeft(), returnPossible  );
 			}
 			else if ( parent.getRight() != null && parent.getRight() != child ) {
-				testPath( pakkuman, path, parent.getRight(), returnPossible, candys  );
+				testPath( pakkuman, path, parent.getRight(), returnPossible  );
 			}
 			
 			// Remonte l'arbre
 			if ( parent.getParent() != null ) {
-				recursiveRecoverPath( pakkuman, path, parent, returnPossible, candys );
+				recursiveRecoverPath( pakkuman, path, parent, returnPossible );
 			}
 		}
 		
@@ -160,30 +154,35 @@ public class Path {
 	 * @param tree Le tree à essayer.
 	 * @return Si un nouveau parcours optimal a été trouvé.
 	 */
-	private static boolean testPath( Pakkuman pakkuman, List<Point> path, Tree tree, int returnPossible, int candys ) {
+	private static boolean testPath( Pakkuman pakkuman, List<Point> path, Tree tree, int returnPossible, int candys, int monsters ) {
 		
 		Node node = tree.getNode();
 		path.add( tree.getNode().getPoint() );
 		
 		if ( node.isCandy() ) {
 			candys += 1;
-			recursiveMakePath( pakkuman, path, tree, returnPossible, candys );
+			recursiveMakePath( pakkuman, path, tree, returnPossible );
 			candys -= 1;
 		}
 		else if ( node.isMonster() ) {
-			if ( candys > 0 ) {
+			if ( pakkuman.candys > 0 ) {
 				candys -= 1;
-				recursiveMakePath( pakkuman, path, tree, returnPossible, candys );
+				monsters += 1;
+				recursiveMakePath( pakkuman, path, tree, returnPossible );
 				candys += 1;
+				ùonsters -= 1;
 			}
 			
 		}
 		else if ( tree.getNode().isEnd() ) {
 			pakkuman.path = new LinkedList<Point>( path );
+			pakkuman.candys = candys + monsters;
+			pakkuman.monsters = monsters;
+			pakkuman.found = true;
 			return true;
 		}
 		else{
-			recursiveMakePath( pakkuman, path, tree, returnPossible, candys );
+			recursiveMakePath( pakkuman, path, tree, returnPossible );
 		}
 		
 		path.remove( path.size() - 1 );
